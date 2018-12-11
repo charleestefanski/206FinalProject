@@ -14,7 +14,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 
 def nytAPI(searchTerm):
 	"""Retrieves data from New York Times API
-	Takes a searchterm to be the query parameter for NYT API
+	Input: searchterm to be the query parameter for NYT API
 	Returns list of items, each representing an article that is found within the parameters given to the API
 	"""
 	key = "2c35ef4d117e460b815883dfdc5315ea"
@@ -26,7 +26,7 @@ def nytAPI(searchTerm):
 
 def newsAPIWallStreetJournal(searchTerm):
 	"""Retrieves data from the Wall Street Journal using the Google News API
-	Takes a searchterm that is used as the query parameter for the News API
+	Input: searchterm that is used as the query parameter for the News API
 	Returns a list of articles that are found within the parameters giving to the API
 	"""
 	#code partially copied from mattlisiv/newsapi-python
@@ -36,7 +36,7 @@ def newsAPIWallStreetJournal(searchTerm):
 
 def newsAPIBBCNews(searchTerm):
 	"""Retrieves data from BBC News using the Google News API (same API as newsAPIWallStreetJournal)
-	Takes a searchterm that is used as the query parameter for the News API
+	Input: searchterm that is used as the query parameter for the News API
 	Returns a list of articles that are found within the parameters giving to the API
 	"""
 	newsapi = NewsApiClient(api_key='d1ae21356040444bbd1ab524da3e41cd')
@@ -45,7 +45,7 @@ def newsAPIBBCNews(searchTerm):
 
 def youtubeAPI(searchTerm):
 	"""Retrives data from Youtube using the Youtube API
-	Takes in a seachTerm that is used as the query parameter for the API
+	Input: a seachTerm that is used as the query parameter for the API
 	Returns a list of video items that are found within the parameters given to the API
 	"""
 	key = 'AIzaSyCQy2M67G1hrjPQFyq1ft7fHxjWgWQiF54'
@@ -59,7 +59,7 @@ def youtubeAPI(searchTerm):
 
 def dataToDatabase(search1):
 	"""Retrives data from all four APIs by calling respective functions
-	Takes in searchterm to be searched on all four sources
+	Input: searchterm to be searched on all four sources
 	Creates connextion to sqlite database, creates table named after the searchterm
 	Executes adding each piece of data to table without duplictae items
 	"""
@@ -98,8 +98,5 @@ def dataToDatabase(search1):
 	conn.commit()
 
 
-def createDatabase():
-	dataToDatabase('Trump')
-
-createDatabase()
+dataToDatabase(input('Search:'))
 
