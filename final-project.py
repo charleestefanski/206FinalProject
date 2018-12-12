@@ -10,6 +10,11 @@ import sqlite3
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
+import plotly
+import plotly.plotly as py 
+import plotly.graph_objs as go 
+import plotly_credentials
+
 
 
 def nytAPI(searchTerm):
@@ -57,15 +62,23 @@ def youtubeAPI(searchTerm):
 	results = search.get("items", [])
 	return results
 
-def dataToDatabase(search1):
+def createDatabaseConnection(databaseName):
+	#takes from http://www.sqlitetutorial.net/sqlite-python/sqlite-python-select/
+	try:
+		conn = sqlite3.connect(databaseName)
+		return conn
+	except Error as e:
+		print(e)
+
+def dataToDatabase(search1, conn):
 	"""Retrives data from all four APIs by calling respective functions
-	Input: searchterm to be searched on all four sources
-	Creates connextion to sqlite database, creates table named after the searchterm
+	Input: searchterm to be searched on all four sources, database connection
+	Creates a cursor, creates table named after the searchterm
 	Executes adding each piece of data to table without duplictae items
 	"""
-	search1 = search1.replace(' ', '_')
-	conn = sqlite3.connect('news_data.sqlite')
 	cur = conn.cursor()
+
+	search1 = search1.replace(' ', '_')
 	cur.execute('CREATE TABLE IF NOT EXISTS '+search1+' ("source" TEXT, "headline" TEXT, "url" TEXT, "published_date" TEXT)')
 	nyt_data = nytAPI(search1)
 	for news in nyt_data:
@@ -97,6 +110,51 @@ def dataToDatabase(search1):
 			cur.execute('INSERT INTO '+search1+' (source, headline, url, published_date) VALUES (?, ?, ?, ?)', ('Youtube', video['snippet']['title'], 'https://www.youtube.com/watch?v=' + video['id']['videoId'], video['snippet']['publishedAt']))
 	conn.commit()
 
+def createDataDict(conn):
+	cur = conn.cursor()
+	cur.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
+	x = cur.fetchall()
+	tables = []
+	for table in x:
+		tables += [table[0]]
+	graphDict = {}
+	for table in tables:
+		cur.execute('SELECT source FROM '+table)
+		tableData = []
+		for item in cur.fetchall():
+			tableData += [item[0]]
+		graphDict[table] = {}
+		for item in tableData:
+			if item not in graphDict[table]:
+				graphDict[table][item] = 0
+			graphDict[table][item] += 1
+	return graphDict
 
-dataToDatabase(input('Search:'))
+
+def createPlotlyBarChart(dataDict):
+	plotly.tools.set_credentials_file(username=plotly_credentials.username, api_key=plotly_credentials.api_key)
+	x = list(dataDict.keys())
+	print(x)
+	sources = list(dataDict[x[0]].keys())
+	barGroups = []
+	for source in sources:
+		print(source)
+		y_s = []
+		print(sources)
+		for item in x:
+			if source in dataDict[item].keys():
+				y_s += [dataDict[item][source]]
+			else:
+				y_s += [0]
+			print(y_s)
+		barGroups += [go.Bar(x=x, y=y_s, name = source, textposition = 'auto')]
+	data = barGroups
+	py.iplot(data, filename = 'barchart1')
+
+	
+
+conn = createDatabaseConnection('news_data.sqlite')
+#dataToDatabase(input('Search:'))
+dataDictionary = createDataDict(conn)
+createPlotlyBarChart(dataDictionary)
 
