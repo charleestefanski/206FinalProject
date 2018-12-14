@@ -182,9 +182,9 @@ def tearDown(conn):
 	conn.close()
 
 conn = createDatabaseConnection('news_data.sqlite')
-#dataToDatabase(input('Search:'), conn)
+dataToDatabase(input('Search:'), conn)
 dataDictionary = createDataDict(conn)
 createCSVReport(dataDictionary)
-#createPlotlyBarChart(dataDictionary)
+createPlotlyBarChart(dataDictionary)
 tearDown(conn)
 
