@@ -1,0 +1,34 @@
+topic/search,source,count
+Trump,New York Times,10
+Trump,The Wall Street Journal,20
+Trump,BBC News,20
+Trump,Youtube,5
+Obama,New York Times,10
+Obama,The Wall Street Journal,20
+Obama,BBC News,9
+Obama,Youtube,5
+Climate_Change,New York Times,10
+Climate_Change,Youtube,3
+Brexit,New York Times,10
+Brexit,The Wall Street Journal,18
+Brexit,BBC News,20
+Brexit,Youtube,5
+Holidays,New York Times,10
+Holidays,The Wall Street Journal,5
+Holidays,BBC News,11
+Holidays,Youtube,5
+Bitcoin,New York Times,10
+Bitcoin,The Wall Street Journal,7
+Bitcoin,Youtube,5
+Amazon,New York Times,10
+Amazon,The Wall Street Journal,19
+Amazon,BBC News,6
+Amazon,Youtube,5
+Artificial_Intelligence,New York Times,10
+Artificial_Intelligence,Youtube,5
+Refugee_Crisis,New York Times,10
+Refugee_Crisis,Youtube,5
+Apple,New York Times,10
+Apple,The Wall Street Journal,19
+Apple,BBC News,6
+Apple,Youtube,5
