@@ -63,7 +63,11 @@ def youtubeAPI(searchTerm):
 	return results
 
 def createDatabaseConnection(databaseName):
-	#takes from http://www.sqlitetutorial.net/sqlite-python/sqlite-python-select/
+	"""Creates connection to SQL database
+	If connection successful, return connection object
+	Otherwise, prints error message
+	"""
+	#taken from http://www.sqlitetutorial.net/sqlite-python/sqlite-python-select/
 	try:
 		conn = sqlite3.connect(databaseName)
 		return conn
@@ -111,6 +115,10 @@ def dataToDatabase(search1, conn):
 	conn.commit()
 
 def createDataDict(conn):
+	"""Creates dictionary of number of stories by source and searchterm/tablename by looping through each table in database
+	Input: database connection object
+	Returns dictionary with searchterm/table name as keys, with dictionary with sources and number of stories for the week as values
+	"""
 	cur = conn.cursor()
 	cur.execute("SELECT name FROM sqlite_master WHERE type = 'table'")
 	x = cur.fetchall()
@@ -132,6 +140,11 @@ def createDataDict(conn):
 
 
 def createPlotlyBarChart(dataDict):
+	"""Creates plotly bargraph and sends it to my Plotly account
+	Input: data dictionary with {searchterm: {source: number of stories}
+	Output: bargraphs by searc, with representation of the number of stories from each source
+	If there are no stories from the source on that search, it is still represented with a zero
+	"""
 	plotly.tools.set_credentials_file(username=plotly_credentials.username, api_key=plotly_credentials.api_key)
 	x = list(dataDict.keys())
 	print(x)
