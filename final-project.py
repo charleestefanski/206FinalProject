@@ -13,7 +13,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 import plotly
 import plotly.plotly as py 
 import plotly.graph_objs as go 
-import plotly_credentials
+import API_credentials
 
 
 
@@ -22,7 +22,7 @@ def nytAPI(searchTerm):
 	Input: searchterm to be the query parameter for NYT API
 	Returns list of items, each representing an article that is found within the parameters given to the API
 	"""
-	key = "2c35ef4d117e460b815883dfdc5315ea"
+	key = API_credentials.nyt_key
 	base_url="http://api.nytimes.com/svc/search/v2/articlesearch.json"
     # fetch data from NYT
 	nyt = requests.get(base_url, params = {'q': searchTerm,'api-key': key, 'begin_date': '20181126', 'end_date': '20181202'})
@@ -35,7 +35,7 @@ def newsAPIWallStreetJournal(searchTerm):
 	Returns a list of articles that are found within the parameters giving to the API
 	"""
 	#code partially copied from mattlisiv/newsapi-python
-	newsapi = NewsApiClient(api_key='d1ae21356040444bbd1ab524da3e41cd')
+	newsapi = NewsApiClient(api_key=API_credentials.newsAPI_key)
 	articles = newsapi.get_everything(q = searchTerm, sources='the-wall-street-journal', language = 'en', from_param = '2018-11-26', to = '2018-12-02')
 	return articles
 
@@ -44,7 +44,7 @@ def newsAPIBBCNews(searchTerm):
 	Input: searchterm that is used as the query parameter for the News API
 	Returns a list of articles that are found within the parameters giving to the API
 	"""
-	newsapi = NewsApiClient(api_key='d1ae21356040444bbd1ab524da3e41cd')
+	newsapi = NewsApiClient(api_key=API_credentials.newsAPI_key)
 	articles = newsapi.get_everything(q = searchTerm, sources='bbc-news', language = 'en', from_param = '2018-11-26', to = '2018-12-02')
 	return articles
 
@@ -53,7 +53,7 @@ def youtubeAPI(searchTerm):
 	Input: a seachTerm that is used as the query parameter for the API
 	Returns a list of video items that are found within the parameters given to the API
 	"""
-	key = 'AIzaSyCQy2M67G1hrjPQFyq1ft7fHxjWgWQiF54'
+	key = API_credentials.youtube_key
 	# used some code from Pres Nichols at github repository https://github.com/spnichol/youtube_tutorial.git
 	YOUTUBE_API_SERVICE_NAME = "youtube"
 	YOUTUBE_API_VERSION = "v3"
@@ -81,38 +81,38 @@ def dataToDatabase(search1, conn):
 	Executes adding each piece of data to table without duplictae items
 	"""
 	cur = conn.cursor()
-
-	search1 = search1.replace(' ', '_')
-	cur.execute('CREATE TABLE IF NOT EXISTS '+search1+' ("source" TEXT, "headline" TEXT, "url" TEXT, "published_date" TEXT)')
-	nyt_data = nytAPI(search1)
-	for news in nyt_data:
-		cur.execute('SELECT headline FROM '+search1+' WHERE url = ? LIMIT 1', (news['web_url'], ))
-		if cur.fetchone():
-			print('NYT article in database')
-		else:
-			cur.execute('INSERT INTO '+search1+' (source, headline, url, published_date) VALUES (?, ?, ?, ?)', ('New York Times', news['headline']['main'], news['web_url'], news['pub_date']))
-	wsj_data = newsAPIWallStreetJournal(search1)
-	for news in wsj_data['articles']:
-		cur.execute('SELECT headline FROM '+search1+' WHERE url = ? LIMIT 1', (news['url'], ))
-		if cur.fetchone():
-			print('WSJ article in database')
-		else:
-			cur.execute('INSERT INTO '+search1+' (source, headline, url, published_date) VALUES (?, ?, ?, ?)', ('The Wall Street Journal', news['title'], news['url'], news['publishedAt']))
-	bbc_data = newsAPIBBCNews(search1)
-	for news in bbc_data['articles']:
-		cur.execute('SELECT headline FROM '+search1+' WHERE url = ? LIMIT 1', (news['url'], ))
-		if cur.fetchone():
-			print('BBC article in database')
-		else:
-			cur.execute('INSERT INTO '+search1+' (source, headline, url, published_date) VALUES (?, ?, ?, ?)', ('BBC News', news['title'], news['url'], news['publishedAt']))
-	youtube_data = youtubeAPI(search1)
-	for video in youtube_data:
-		cur.execute('SELECT headline FROM '+search1+' WHERE url = ? LIMIT 1', ('https://www.youtube.com/watch?v=' + video['id']['videoId'], ))
-		if cur.fetchone():
-			print('Youtube video in database')
-		else:
-			cur.execute('INSERT INTO '+search1+' (source, headline, url, published_date) VALUES (?, ?, ?, ?)', ('Youtube', video['snippet']['title'], 'https://www.youtube.com/watch?v=' + video['id']['videoId'], video['snippet']['publishedAt']))
-	conn.commit()
+	if ((search1 != 'None') and (search1 != '')):
+		search1 = search1.replace(' ', '_')
+		cur.execute('CREATE TABLE IF NOT EXISTS '+search1+' ("source" TEXT, "headline" TEXT, "url" TEXT, "published_date" TEXT)')
+		nyt_data = nytAPI(search1)
+		for news in nyt_data:
+			cur.execute('SELECT headline FROM '+search1+' WHERE url = ? LIMIT 1', (news['web_url'], ))
+			if cur.fetchone():
+				print('NYT article in database')
+			else:
+				cur.execute('INSERT INTO '+search1+' (source, headline, url, published_date) VALUES (?, ?, ?, ?)', ('New York Times', news['headline']['main'], news['web_url'], news['pub_date']))
+		wsj_data = newsAPIWallStreetJournal(search1)
+		for news in wsj_data['articles']:
+			cur.execute('SELECT headline FROM '+search1+' WHERE url = ? LIMIT 1', (news['url'], ))
+			if cur.fetchone():
+				print('WSJ article in database')
+			else:
+				cur.execute('INSERT INTO '+search1+' (source, headline, url, published_date) VALUES (?, ?, ?, ?)', ('The Wall Street Journal', news['title'], news['url'], news['publishedAt']))
+		bbc_data = newsAPIBBCNews(search1)
+		for news in bbc_data['articles']:
+			cur.execute('SELECT headline FROM '+search1+' WHERE url = ? LIMIT 1', (news['url'], ))
+			if cur.fetchone():
+				print('BBC article in database')
+			else:
+				cur.execute('INSERT INTO '+search1+' (source, headline, url, published_date) VALUES (?, ?, ?, ?)', ('BBC News', news['title'], news['url'], news['publishedAt']))
+		youtube_data = youtubeAPI(search1)
+		for video in youtube_data:
+			cur.execute('SELECT headline FROM '+search1+' WHERE url = ? LIMIT 1', ('https://www.youtube.com/watch?v=' + video['id']['videoId'], ))
+			if cur.fetchone():
+				print('Youtube video in database')
+			else:
+				cur.execute('INSERT INTO '+search1+' (source, headline, url, published_date) VALUES (?, ?, ?, ?)', ('Youtube', video['snippet']['title'], 'https://www.youtube.com/watch?v=' + video['id']['videoId'], video['snippet']['publishedAt']))
+		conn.commit()
 
 def createDataDict(conn):
 	"""Creates dictionary of number of stories by source and searchterm/tablename by looping through each table in database
@@ -145,29 +145,33 @@ def createPlotlyBarChart(dataDict):
 	Output: bargraphs by searc, with representation of the number of stories from each source
 	If there are no stories from the source on that search, it is still represented with a zero
 	"""
-	plotly.tools.set_credentials_file(username=plotly_credentials.username, api_key=plotly_credentials.api_key)
+	plotly.tools.set_credentials_file(username=API_credentials.plotly_username, api_key=API_credentials.plotly_api_key)
 	x = list(dataDict.keys())
-	print(x)
 	sources = list(dataDict[x[0]].keys())
 	barGroups = []
 	for source in sources:
-		print(source)
 		y_s = []
-		print(sources)
 		for item in x:
 			if source in dataDict[item].keys():
 				y_s += [dataDict[item][source]]
 			else:
 				y_s += [0]
-			print(y_s)
 		barGroups += [go.Bar(x=x, y=y_s, name = source, textposition = 'auto')]
 	data = barGroups
-	py.iplot(data, filename = 'barchart1')
+	layout = go.Layout(title='Number of News Stories/Videos Published During the Week of November 26, 2018 by Topic', xaxis=dict(title='Topic (or search term used)'), yaxis=dict(title='Number of stories/videos published during the week'))
+	fig = go.Figure(data=data, layout=layout)
+	py.iplot(fig, filename = 'barchart1')
 
-	
+def tearDown(conn):
+	"""Tears down connection to database
+	Input is database connection objject
+	"""
+	conn.close()
 
 conn = createDatabaseConnection('news_data.sqlite')
-#dataToDatabase(input('Search:'))
+dataToDatabase(input('Search:'), conn)
 dataDictionary = createDataDict(conn)
+print(dataDictionary)
 createPlotlyBarChart(dataDictionary)
+tearDown(conn)
 
