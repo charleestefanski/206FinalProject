@@ -10,6 +10,7 @@ import sqlite3
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from google_auth_oauthlib.flow import InstalledAppFlow
+import csv
 import plotly
 import plotly.plotly as py 
 import plotly.graph_objs as go 
@@ -138,6 +139,18 @@ def createDataDict(conn):
 			graphDict[table][item] += 1
 	return graphDict
 
+def createCSVReport(dataDict):
+	""" Writes csv file with counted results
+	Input: dictionary created in createDataDict
+	"""
+	outfile = open("newsData.csv", "w")
+	writer = csv.writer(outfile)
+	myFields = ['topic/search', 'source', 'count']
+	writer.writerow(myFields)
+	for topic in list(dataDict.keys()):
+		for source in dataDict[topic]:
+			writer.writerow([topic, source, dataDict[topic][source]])
+	outfile.close()
 
 def createPlotlyBarChart(dataDict):
 	"""Creates plotly bargraph and sends it to my Plotly account
@@ -169,9 +182,9 @@ def tearDown(conn):
 	conn.close()
 
 conn = createDatabaseConnection('news_data.sqlite')
-dataToDatabase(input('Search:'), conn)
+#dataToDatabase(input('Search:'), conn)
 dataDictionary = createDataDict(conn)
-print(dataDictionary)
-createPlotlyBarChart(dataDictionary)
+createCSVReport(dataDictionary)
+#createPlotlyBarChart(dataDictionary)
 tearDown(conn)
 
